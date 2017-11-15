@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 public class PageRankBuilder {
 
-    private final boolean USE_STREAMS = false;
     private final double DAMPING_FACTOR;
     private final double EPSILON;
     private final int MAX_ITERATIONS;
@@ -77,41 +76,18 @@ public class PageRankBuilder {
     }
 
     private double computeDelta(Map<String, Double> prOld, Map<String, Double> prNew) {
-        if (USE_STREAMS) {
-            return prOld.keySet().stream().mapToDouble(k -> Math.abs(prOld.get(k) - prNew.get(k))).sum();
-        }
-        double delta = 0.0;
-        for (String key : prOld.keySet()) {
-            delta += Math.abs(prOld.get(key) - prNew.get(key));
-        }
-        return delta;
+        return prOld.keySet().stream().mapToDouble(k -> Math.abs(prOld.get(k) - prNew.get(k))).sum();
     }
 
     private double getPageRankFromNoCitations(Map<String, List<String>> papers, List<String> citesNoOne, Map<String, Double> pageRank) {
         // Compute contribution of papers that do not cite any other paper
-        if (USE_STREAMS) {
-            return citesNoOne.stream().mapToDouble(paper -> pageRank.get(paper)).sum()/papers.size();
-        }
-        double prFromNoCitations = 0.0;
-        for (String paper : citesNoOne) {
-            prFromNoCitations += pageRank.get(paper);
-        }
-        prFromNoCitations /= papers.size();
-        return prFromNoCitations;
+        return citesNoOne.stream().mapToDouble(paper -> pageRank.get(paper)).sum()/papers.size();
     }
 
     private Map<String, Double> computeInitialPageRanks(HashMap<String, List<String>> papers) {
         int numberOfPapers = papers.size();
         double initialPageRank = 1.0/numberOfPapers;
-
-        if (USE_STREAMS) {
-            return papers.keySet().stream().collect(Collectors.toMap( Function.identity(), k -> initialPageRank));
-        }
-        HashMap<String, Double> pageRank0 = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : papers.entrySet()) {
-            pageRank0.put(entry.getKey(), initialPageRank);
-        }
-        return pageRank0;
+        return papers.keySet().stream().collect(Collectors.toMap( Function.identity(), k -> initialPageRank));
     }
 
     private Map<String, List<String>> buildReverseMap(Map<String, List<String>> papers) {
@@ -135,9 +111,6 @@ public class PageRankBuilder {
     }
 
     private List<String> buildCitesNoOne(Map<String, List<String>> papers) {
-        if (USE_STREAMS) {
-            return papers.entrySet().stream().filter(e -> e.getValue().size() == 0).map(e -> e.getKey()).collect(Collectors.toList());
-        }
         List<String> noCitations = new ArrayList<String>();;
 
         for (Map.Entry<String, List<String>> entry : papers.entrySet()) {
